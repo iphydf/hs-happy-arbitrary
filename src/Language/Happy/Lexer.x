@@ -55,6 +55,9 @@ tokens :-
 <0>		"%%"					{ mkL PctPercentPercent }
 <0>		"::"					{ mkL PctColonColon }
 <0>		":"					{ mkL PctColon }
+<0>		","					{ mkL PctComma }
+<0>		"("					{ mkL PctLParen }
+<0>		")"					{ mkL PctRParen }
 <0>		"|"					{ mkL PctPipe }
 
 <0>		"--"\n					;

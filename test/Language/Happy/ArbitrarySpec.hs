@@ -36,8 +36,11 @@ sampleToken c = case c of
 
     PctColon           -> ":"
     PctColonColon      -> "::"
+    PctComma           -> ","
+    PctLParen          -> "("
     PctPercentPercent  -> "%%"
     PctPipe            -> "|"
+    PctRParen          -> ")"
 
     LitCode            -> "{ code }"
     LitInteger         -> "0"
@@ -64,4 +67,4 @@ spec = tryParseGrammar $ \g -> do
             forAll (Text.intercalate " " . map sampleToken <$> genTokens (defConfig parseToken) "Grammar" g) $ \code -> do
                 case runAlex (LBS.fromStrict . Text.encodeUtf8 $ code) parseGrammar of
                     Left err -> expectationFailure err
-                    Right ok -> print ok
+                    Right _  -> return ()

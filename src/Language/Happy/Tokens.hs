@@ -24,8 +24,11 @@ data LexemeClass
 
     | PctColon
     | PctColonColon
+    | PctComma
+    | PctLParen
     | PctPercentPercent
     | PctPipe
+    | PctRParen
 
     | LitCode
     | LitInteger

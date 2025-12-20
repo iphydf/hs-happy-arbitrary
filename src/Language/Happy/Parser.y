@@ -47,6 +47,9 @@ import           Language.Happy.Tokens (LexemeClass (..))
     '%%'			{ L _ PctPercentPercent		_ }
     '::'			{ L _ PctColonColon		_ }
     ':'				{ L _ PctColon			_ }
+    ','				{ L _ PctComma			_ }
+    '('				{ L _ PctLParen			_ }
+    ')'				{ L _ PctRParen			_ }
     '|'				{ L _ PctPipe			_ }
 
     LIT_STRING			{ L _ LitString			_ }
@@ -107,7 +110,8 @@ Rules
 
 Rule :: { NonTerm }
 Rule
-:	RuleType RuleDefn				{ Fix $ Rule $1 $2 }
+:	RuleType					{ $1 }
+|	RuleDefn					{ $1 }
 
 RuleType :: { NonTerm }
 RuleType
@@ -115,7 +119,13 @@ RuleType
 
 RuleDefn :: { NonTerm }
 RuleDefn
-:	ID_NAME ':' RuleLines				{ Fix $ RuleDefn $1 $3 }
+:	ID_NAME ':' RuleLines				{ Fix $ RuleDefn $1 [] $3 }
+|	ID_NAME '(' RuleParams ')' ':' RuleLines	{ Fix $ RuleDefn $1 $3 $6 }
+
+RuleParams :: { [Term] }
+RuleParams
+:	ID_NAME						{ [$1] }
+|	RuleParams ',' ID_NAME				{ $1 ++ [$3] }
 
 RuleLines :: { [NonTerm] }
 RuleLines
@@ -125,9 +135,24 @@ RuleLines
 RuleLine :: { NonTerm }
 RuleLine
 :	'{code}'					{ Fix $ RuleLine [] $1 }
-|	TokenNames '{code}'				{ Fix $ RuleLine $1 $2 }
-|	TokenNames '%prec' ID_NAME '{code}'		{ Fix $ RuleLine $1 $4 }
+|	Symbols '{code}'				{ Fix $ RuleLine $1 $2 }
+|	Symbols '%prec' ID_NAME '{code}'		{ Fix $ RuleLine $1 $4 }
 
+Symbols :: { [NonTerm] }
+Symbols
+:	Symbol						{ [$1] }
+|	Symbols Symbol					{ $1 ++ [$2] }
+
+Symbol :: { NonTerm }
+Symbol
+:	ID_NAME						{ Fix $ Symbol $1 [] }
+|	LIT_STRING					{ Fix $ Symbol $1 [] }
+|	ID_NAME '(' SymbolArgs ')'			{ Fix $ Symbol $1 $3 }
+
+SymbolArgs :: { [NonTerm] }
+SymbolArgs
+:	Symbol						{ [$1] }
+|	SymbolArgs ',' Symbol				{ $1 ++ [$3] }
 
 {
 type Term = Lexeme Text
